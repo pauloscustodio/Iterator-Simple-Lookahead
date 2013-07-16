@@ -1,0 +1,56 @@
+Iterator-Simple-Lookahead version 0.01
+======================================
+
+Iterator::Simple::Lookahead - Simple iterator with lookahead and unget
+
+This module encapsulates an iterator function. An iterator function returns the
+next element in the stream on each call, and returns C<undef> on end of input.
+
+The iterator can return a code reference - this new iterator is inserted at the 
+head of the queue.
+
+The object allows the user to C<peek()> the Nth element of the stream without
+consuming it, or to get it and remove from the stream.
+
+A list of items can also be pushed back to the stream by C<unget()>, 
+to be retrieved in the subsequent C<next()> calls. The next item can also be
+retrieved by calling C<$iter-E<gt>()>.
+
+The input list to the constructor and to C<unget()> contains items to be
+retrieved on each C<next()> call, or code references to be called to extract the
+next item from the stream.
+
+Other types of input can be converted to a code reference by C<iter()> of 
+L<Iterator::Simple|Iterator::Simple>.
+
+This module is built on top of L<Iterator::Simple|Iterator::Simple> 
+and returns iterators that are compatible with the former, 
+i.e. an object of type C<Iterator::Simple::Lookahead> 
+can be used as an input to C<iter()>.
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+DEPENDENCIES
+
+This module requires these other modules and libraries:
+
+  Class::XSAccessor::Array, Iterator::Simple
+
+COPYRIGHT AND LICENCE
+
+Put the correct copyright and licence information here.
+
+Copyright (C) 2013 by Paulo Custodio <pscust@cpan.org>
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.16.1 or,
+at your option, any later version of Perl 5 you may have available.
+
+

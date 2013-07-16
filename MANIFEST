@@ -1,0 +1,10 @@
+Changes
+lib/Iterator/Simple/Lookahead.pm
+Makefile.PL
+MANIFEST
+MANIFEST.SKIP
+README
+t/Iterator-Simple-Lookahead.t
+t/manifest.t
+t/pod-coverage.t
+t/pod.t
