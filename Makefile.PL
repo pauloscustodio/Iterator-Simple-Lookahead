@@ -6,7 +6,7 @@ WriteMakefile(
     NAME              => 'Iterator::Simple::Lookahead',
     VERSION_FROM      => 'lib/Iterator/Simple/Lookahead.pm',
     PREREQ_PM         => {
-		'Class::XSAccessor::Array'	=> 1.08,
+		'Class::XSAccessor'			=> 1.18,
 		'Iterator::Simple'			=> 0.06,
         'Test::More' 				=> 0.98,	# needs done_testing()
 	},
@@ -14,7 +14,7 @@ WriteMakefile(
       (ABSTRACT_FROM  => 'lib/Iterator/Simple/Lookahead.pm', # retrieve abstract from module
        AUTHOR         => 'Paulo Custodio <pscust@cpan.org>') : ()),
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
-    clean               => { FILES => [ 'Asm-Preproc-*',
+    clean               => { FILES => [ 'Iterator-Simple-Lookahead-*',
 										'*.tmp',
 										'*.bak',
 									  ]

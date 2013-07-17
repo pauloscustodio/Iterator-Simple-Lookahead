@@ -1,4 +1,4 @@
-# $Id: Stream.pm,v 1.7 2010/10/15 15:55:34 Paulo Exp $
+# $Id: Lookahead.pm,v 1.1 2013/07/16 15:23:14 Paulo Exp $
 
 package Iterator::Simple::Lookahead;
 
@@ -20,7 +20,7 @@ use Carp;
 use Iterator::Simple qw( is_iterator );
 use base 'Iterator::Simple::Iterator';
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 #------------------------------------------------------------------------------
 
@@ -75,16 +75,16 @@ L<Iterator::Simple|Iterator::Simple>.
 
 #------------------------------------------------------------------------------
 
-use Class::XSAccessor::Array {
-	accessors 		=> {
-		_look_ahead	=> 0,		# list of computed values
-		_iterators	=> 1,		# list of iterators
-	},
+use Class::XSAccessor {
+	accessors 		=> [
+		'_look_ahead',		# list of computed values
+		'_iterators',		# list of iterators
+	],
 };
 
 sub new {
 	my($class, @iter) = @_;
-	my $self = bless [[],[]], $class;
+	my $self = bless { _look_ahead => [], _iterators => [] }, $class;
 	$self->unget(@iter);
 	return $self;
 }

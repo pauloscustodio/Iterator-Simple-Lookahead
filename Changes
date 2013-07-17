@@ -1,6 +1,7 @@
-Revision history for Perl extension Iterator::Simple::Lookahead.
+0.02	2013-07-17
+	Feature Changes
+	* Implement as blessed hash to allow sub-classing
 
-0.01  Mon Jul 15 23:24:49 2013
-	- original version; created by h2xs 1.23 with options
-		-AX Iterator::Simple::Lookahead
+0.01  2013-07-15
+	- original version
 
