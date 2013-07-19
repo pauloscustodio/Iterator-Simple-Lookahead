@@ -1,4 +1,4 @@
-# $Id: Lookahead.pm,v 1.1 2013/07/16 15:23:14 Paulo Exp $
+# $Id: Lookahead.pm,v 1.2 2013/07/17 12:31:23 Paulo Exp $
 
 package Iterator::Simple::Lookahead;
 
@@ -17,10 +17,11 @@ use strict;
 use warnings;
 
 use Carp;
-use Iterator::Simple qw( is_iterator );
+use Iterator::Simple qw( is_iterator iterator );
+use List::AllUtils qw( first_index );
 use base 'Iterator::Simple::Iterator';
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 #------------------------------------------------------------------------------
 
@@ -74,18 +75,18 @@ L<Iterator::Simple|Iterator::Simple>.
 =cut
 
 #------------------------------------------------------------------------------
-
+# Object contains list of computed values and iterator to compute next
 use Class::XSAccessor {
 	accessors 		=> [
-		'_look_ahead',		# list of computed values
-		'_iterators',		# list of iterators
+		'_queue',		# list of computed values
+		'_iter',		# iterator to compute next
 	],
 };
 
 sub new {
-	my($class, @iter) = @_;
-	my $self = bless { _look_ahead => [], _iterators => [] }, $class;
-	$self->unget(@iter);
+	my($class, @items) = @_;
+	my $self = bless {_queue=>[]}, $class;
+	$self->unget(@items);
 	return $self;
 }
 
@@ -119,34 +120,21 @@ sub peek {
 	my($self, $n) = @_;
 	$n ||= 0; croak("negative index $n") if $n < 0;
 	
-	while (1) {
-		# return element if already computed
-		return $self->_look_ahead->[$n] 
-			if $n < scalar @{$self->_look_ahead};
+	my $queue = $self->_queue;
+	my $iter  = $self->_iter;
 	
-		# empty list of iterators -> end of input
-		return unless @{$self->_iterators};
-		
-		# get first iterator
-		my $iter = $self->_iterators->[0];
-		if ( _is_iter($iter) ) {
-			my $value = $iter->();
-			if ( defined($value) ) {
-				# allow an iterator to get another
-				unshift @{$self->_iterators}, $value;
-			}
-			else {
-				shift @{$self->_iterators};		# exhausted
-			}
+	return if ! $iter && $n >= @$queue;		# no more items
+	
+	while ( $n >= @$queue ) {
+		my $value = $iter->();
+		if (! defined $value) {				# iterator exhausted
+			$self->_iter( undef );
+			return;
 		}
-		elsif ( defined($iter) ) {
-			push @{$self->_look_ahead}, $iter;	# not iterator
-			shift @{$self->_iterators};
-		}
-		else {
-			shift @{$self->_iterators};			# skip undefined values
-		}
+		push @$queue, $value;
 	}
+	
+	return $queue->[$n];
 }
 
 #------------------------------------------------------------------------------
@@ -164,7 +152,7 @@ Returns C<undef> if the stream is empty
 sub next {
 	my($self) = @_;
 	$self->peek;	# compute head element
-	return shift @{$self->_look_ahead};
+	return shift @{$self->_queue};
 }
 
 #------------------------------------------------------------------------------
@@ -175,21 +163,58 @@ Pushes back a list of values and/or iterators to the stream, that will be
 retrieved on the subsequent calls to C<next()>.
 
 Can be called from within an iterator, to insert values that will be returned 
-after the current call, e.g. calling from the iterator:
+before the current call, e.g. calling from the iterator:
 
-  $stream->unget(2..3); return 1;
+  $stream->unget(1..3); return 4;
 
-will result in the stream 1,2,3 being returned from the stream.
+will result in the values 1,2,3,4 being returned from the stream.
 
 =cut
 
 #------------------------------------------------------------------------------
 
 sub unget {
-	my($self, @iter) = @_;
-	push @iter, @{$self->_look_ahead};
-	@{$self->_look_ahead} = ();
-	unshift @{$self->_iterators}, @iter;
+	my($self, @items) = @_;
+	
+	# remove undefined values
+	@items = grep { defined } @items;
+	
+	# search for the first iterator in the given input
+	my $first_iterator = first_index { _is_iter($_) } @items;
+	if ($first_iterator < 0) {
+		# only data
+		unshift @{$self->_queue}, @items;
+	}
+	else {
+		# keep data up to first iterator in queue, all the rest, including exiting
+		# data in the queue is moved to the iterator
+		push @items, @{$self->_queue};
+		@{$self->_queue} = splice(@items, 0, $first_iterator);
+		
+		# chain current iterator through @items
+		push @items, $self->_iter;
+		
+		# create iterator to go through @items
+		$self->_iter( iterator {
+			while (1) {
+				return unless @items;				# empty list
+				my $item = shift @items;
+				next unless defined $item;
+				
+				if ( _is_iter($item) ) {
+					my $value = $item->();
+					if ( defined $value ) {
+						# insert value to allow an iterator to get another
+						# insert the iterator so that it is called again
+						unshift @items, $value, $item;
+					}
+				}
+				else {
+					return $item;
+				}
+			}
+		} );
+	}
 }
 
 #------------------------------------------------------------------------------
