@@ -1,3 +1,7 @@
+0.04	2013-07-24
+	Other
+	* Only call unget() from new() if needed
+
 0.03	2013-07-19
 	Other
 	* Simplified peek() by moving logic to the iterator created in unget()
