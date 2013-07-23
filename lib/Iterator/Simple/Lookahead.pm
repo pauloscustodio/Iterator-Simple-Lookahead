@@ -1,4 +1,4 @@
-# $Id: Lookahead.pm,v 1.2 2013/07/17 12:31:23 Paulo Exp $
+# $Id: Lookahead.pm,v 1.3 2013/07/19 20:05:55 Paulo Exp $
 
 package Iterator::Simple::Lookahead;
 
@@ -21,7 +21,7 @@ use Iterator::Simple qw( is_iterator iterator );
 use List::AllUtils qw( first_index );
 use base 'Iterator::Simple::Iterator';
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 #------------------------------------------------------------------------------
 
@@ -86,7 +86,7 @@ use Class::XSAccessor {
 sub new {
 	my($class, @items) = @_;
 	my $self = bless {_queue=>[]}, $class;
-	$self->unget(@items);
+	$self->unget(@items) if @items;
 	return $self;
 }
 
