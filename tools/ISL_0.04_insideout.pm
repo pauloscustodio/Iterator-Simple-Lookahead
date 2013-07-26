@@ -2,6 +2,8 @@
 
 package Iterator::Simple::Lookahead;
 
+{ # start closure
+
 #------------------------------------------------------------------------------
 
 =head1 NAME
@@ -73,27 +75,22 @@ L<Iterator::Simple|Iterator::Simple>.
 =cut
 
 #------------------------------------------------------------------------------
+# Object contains list of computed values and iterator to compute next
+# Global attributes indexed by $self
+my %QUEUE;		# list of non-iterator values peeked
+my %ITERS;		# list of iterators to be evaluated
+
 use base 'Iterator::Simple::Iterator';
-use Class::XSAccessor {
-	accessors 		=> [
-		'_look_ahead',		# list of computed values
-		'_iterators',		# list of iterators
-	],
-};
 
 sub new {
 	my($class, @items) = @_;
-	my $self = bless { _look_ahead => [], _iterators => [] }, $class;
-	$self->unget(@items) if @items;
+	my $self;
+	$self = $class->SUPER::new(sub { return $self->next });
+	$QUEUE{$self} = [];
+	$ITERS{$self} = [];
+	$self->unget(@items);
 	return $self;
 }
-
-use overload (
-	'&{}'	=> sub { my($self) = @_; return sub { $self->next } },
-	'<>'	=> 'next',
-	'|'		=> 'filter',
-	fallback => 1,
-);
 
 #------------------------------------------------------------------------------
 
@@ -120,29 +117,29 @@ sub peek {
 	
 	while (1) {
 		# return element if already computed
-		return $self->_look_ahead->[$n] if $n < @{$self->_look_ahead};
+		return $QUEUE{$self}[$n] if $n < @{$QUEUE{$self}};
 	
 		# empty list of iterators -> end of input
-		return unless @{$self->_iterators};
+		return unless @{$ITERS{$self}};
 		
 		# get first iterator
-		my $iter = $self->_iterators->[0];
+		my $iter = $ITERS{$self}[0];
 		if ( ! defined $iter ) {
-			shift @{$self->_iterators};			# skip undefined values
+			shift @{$ITERS{$self}};			# skip undefined values
 		}
 		elsif ( _is_iter($iter) ) {
 			my $value = $iter->();
 			if ( defined($value) ) {
 				# allow an iterator to get another
-				unshift @{$self->_iterators}, $value;
+				unshift @{$ITERS{$self}}, $value;
 			}
 			else {
-				shift @{$self->_iterators};		# exhausted
+				shift @{$ITERS{$self}};		# exhausted
 			}
 		}
 		else {
-			push @{$self->_look_ahead}, $iter;	# not iterator
-			shift @{$self->_iterators};
+			push @{$QUEUE{$self}}, $iter;	# not iterator
+			shift @{$ITERS{$self}};
 		}
 	}
 }	
@@ -162,7 +159,7 @@ Returns C<undef> if the stream is empty
 sub next {
 	my($self) = @_;
 	$self->peek;	# compute head element
-	return shift @{$self->_look_ahead};
+	return shift @{$QUEUE{$self}};
 }
 
 #------------------------------------------------------------------------------
@@ -177,7 +174,7 @@ before the current call, e.g. calling from the iterator:
 
   $stream->unget(1..3); return 4;
 
-will result in the values 4,1,2,3 being returned from the stream.
+will result in the values 1,2,3,4 being returned from the stream.
 
 =cut
 
@@ -185,8 +182,8 @@ will result in the values 4,1,2,3 being returned from the stream.
 
 sub unget {
 	my($self, @items) = @_;
-	unshift @{$self->_iterators}, @items, @{$self->_look_ahead};
-	@{$self->_look_ahead} = ();
+	unshift @{$ITERS{$self}}, @items, @{$QUEUE{$self}};
+	@{$QUEUE{$self}} = ();
 }
 
 #------------------------------------------------------------------------------
@@ -217,5 +214,7 @@ it under the same terms as Perl itself, either Perl version 5.16.1 or,
 at your option, any later version of Perl 5 you may have available.
 
 =cut
+
+} # end closure
 
 1;

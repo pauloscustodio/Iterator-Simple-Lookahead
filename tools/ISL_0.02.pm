@@ -1,4 +1,4 @@
-# $Id: Lookahead.pm,v 1.4 2013/07/23 23:27:33 Paulo Exp $
+# $Id: Lookahead.pm,v 1.2 2013/07/17 12:31:23 Paulo Exp $
 
 package Iterator::Simple::Lookahead;
 
@@ -18,6 +18,7 @@ use warnings;
 
 use Carp;
 use Iterator::Simple qw( is_iterator );
+use base 'Iterator::Simple::Iterator';
 
 our $VERSION = '0.05';
 
@@ -73,7 +74,7 @@ L<Iterator::Simple|Iterator::Simple>.
 =cut
 
 #------------------------------------------------------------------------------
-use base 'Iterator::Simple::Iterator';
+
 use Class::XSAccessor {
 	accessors 		=> [
 		'_look_ahead',		# list of computed values
@@ -82,9 +83,9 @@ use Class::XSAccessor {
 };
 
 sub new {
-	my($class, @items) = @_;
+	my($class, @iter) = @_;
 	my $self = bless { _look_ahead => [], _iterators => [] }, $class;
-	$self->unget(@items) if @items;
+	$self->unget(@iter);
 	return $self;
 }
 
@@ -120,17 +121,15 @@ sub peek {
 	
 	while (1) {
 		# return element if already computed
-		return $self->_look_ahead->[$n] if $n < @{$self->_look_ahead};
+		return $self->_look_ahead->[$n] 
+			if $n < scalar @{$self->_look_ahead};
 	
 		# empty list of iterators -> end of input
 		return unless @{$self->_iterators};
 		
 		# get first iterator
 		my $iter = $self->_iterators->[0];
-		if ( ! defined $iter ) {
-			shift @{$self->_iterators};			# skip undefined values
-		}
-		elsif ( _is_iter($iter) ) {
+		if ( _is_iter($iter) ) {
 			my $value = $iter->();
 			if ( defined($value) ) {
 				# allow an iterator to get another
@@ -140,12 +139,15 @@ sub peek {
 				shift @{$self->_iterators};		# exhausted
 			}
 		}
-		else {
+		elsif ( defined($iter) ) {
 			push @{$self->_look_ahead}, $iter;	# not iterator
 			shift @{$self->_iterators};
 		}
+		else {
+			shift @{$self->_iterators};			# skip undefined values
+		}
 	}
-}	
+}
 
 #------------------------------------------------------------------------------
 
@@ -173,20 +175,21 @@ Pushes back a list of values and/or iterators to the stream, that will be
 retrieved on the subsequent calls to C<next()>.
 
 Can be called from within an iterator, to insert values that will be returned 
-before the current call, e.g. calling from the iterator:
+after the current call, e.g. calling from the iterator:
 
-  $stream->unget(1..3); return 4;
+  $stream->unget(2..3); return 1;
 
-will result in the values 4,1,2,3 being returned from the stream.
+will result in the stream 1,2,3 being returned from the stream.
 
 =cut
 
 #------------------------------------------------------------------------------
 
 sub unget {
-	my($self, @items) = @_;
-	unshift @{$self->_iterators}, @items, @{$self->_look_ahead};
+	my($self, @iter) = @_;
+	push @iter, @{$self->_look_ahead};
 	@{$self->_look_ahead} = ();
+	unshift @{$self->_iterators}, @iter;
 }
 
 #------------------------------------------------------------------------------

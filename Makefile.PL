@@ -8,7 +8,6 @@ WriteMakefile(
     PREREQ_PM         => {
 		'Class::XSAccessor'			=> 1.18,
 		'Iterator::Simple'			=> 0.06,
-		'List::AllUtils'			=> 0.03,
         'Test::More' 				=> 0.98,	# needs done_testing()		
 	},
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005

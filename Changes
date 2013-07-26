@@ -1,3 +1,7 @@
+0.05	2013-07-26
+	Other
+	* Benchmark implementations and revert to fastest that allows subclassing, version 0.02
+
 0.04	2013-07-24
 	Other
 	* Only call unget() from new() if needed
