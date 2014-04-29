@@ -1,3 +1,10 @@
+0.06	2014-04-29
+
+	Bug Fixes
+	* RT #95114: Requires Perl 5.16.1?
+	  Requirement for Perl 5.16.1 was not necessary, decreased to 5.8.0
+	  (needed by Class::XSAccessor)
+
 0.05	2013-07-26
 	Other
 	* Benchmark implementations and revert to fastest that allows subclassing, version 0.02
