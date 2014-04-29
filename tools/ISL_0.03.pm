@@ -1,4 +1,4 @@
-# $Id: Lookahead.pm,v 1.3 2013/07/19 20:05:55 Paulo Exp $
+# $Id: ISL_0.03.pm,v 1.1 2013/07/26 23:25:07 Paulo Exp $
 
 package Iterator::Simple::Lookahead;
 
@@ -12,7 +12,7 @@ Iterator::Simple::Lookahead - Simple iterator with lookahead and unget
 
 #------------------------------------------------------------------------------
 
-use 5.016001;
+use 5.008000;
 use strict;
 use warnings;
 
@@ -21,7 +21,7 @@ use Iterator::Simple qw( is_iterator iterator );
 use List::AllUtils qw( first_index );
 use base 'Iterator::Simple::Iterator';
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 #------------------------------------------------------------------------------
 
