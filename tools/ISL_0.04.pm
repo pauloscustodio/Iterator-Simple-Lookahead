@@ -21,7 +21,7 @@ use Iterator::Simple qw( is_iterator iterator );
 use List::AllUtils qw( first_index );
 use base 'Iterator::Simple::Iterator';
 
-our $VERSION = '0.06';
+our $VERSION = '0.06_01';
 
 #------------------------------------------------------------------------------
 

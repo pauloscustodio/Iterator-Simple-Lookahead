@@ -21,7 +21,7 @@ use warnings;
 use Carp;
 use Iterator::Simple qw( is_iterator );
 
-our $VERSION = '0.06';
+our $VERSION = '0.06_01';
 
 #------------------------------------------------------------------------------
 
