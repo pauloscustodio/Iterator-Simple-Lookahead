@@ -20,7 +20,7 @@ use Carp;
 use Iterator::Simple qw( is_iterator );
 use base 'Iterator::Simple::Iterator';
 
-our $VERSION = '0.06_01';
+our $VERSION = '0.07';
 
 #------------------------------------------------------------------------------
 
