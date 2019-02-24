@@ -21,7 +21,7 @@ use Iterator::Simple qw( is_iterator iterator );
 use List::AllUtils qw( first_index );
 use base 'Iterator::Simple::Iterator';
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 #------------------------------------------------------------------------------
 
@@ -76,7 +76,7 @@ L<Iterator::Simple|Iterator::Simple>.
 
 #------------------------------------------------------------------------------
 # Object contains list of computed values and iterator to compute next
-use Class::XSAccessor {
+use Class::Accessor {
 	accessors 		=> [
 		'_queue',		# list of computed values
 		'_iter',		# iterator to compute next

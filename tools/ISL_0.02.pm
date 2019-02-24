@@ -20,7 +20,7 @@ use Carp;
 use Iterator::Simple qw( is_iterator );
 use base 'Iterator::Simple::Iterator';
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 #------------------------------------------------------------------------------
 
@@ -75,7 +75,7 @@ L<Iterator::Simple|Iterator::Simple>.
 
 #------------------------------------------------------------------------------
 
-use Class::XSAccessor {
+use Class::Accessor {
 	accessors 		=> [
 		'_look_ahead',		# list of computed values
 		'_iterators',		# list of iterators
